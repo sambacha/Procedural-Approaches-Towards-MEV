@@ -433,10 +433,3 @@ Zinsmeister, N., Adams, H., Robinson, D., & Salem, M. (2019). **Uniswap v2-core 
 Bacha, S. (2021).** Gas Reporting Index** (Version 1.1.4) [Computer software]. https://doi.org/10.5281/zenodo.1234
 
 Guillermo Angeris, Tarun Chitra (2022). **Optimal Routing for Constant Function Market Makers** [Computer software]. https://github.com/angeris/cfmm-routing-code
-
-
-## Editing
-
-Triangular Arbitrage 9, makes reference to 3.11 in 3.19, double check (pretty sure its correct but just checking if correct referencce as it was in the 2 paragraphss preceeding)
-Triangular Arbitrage page 11, makes reference to (sic) equation `??`
-
