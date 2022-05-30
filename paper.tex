@@ -61,10 +61,10 @@
 \begin{document}
 
 \hypersetup{
-pdftitle={procedural approaches towards Maximal Extracted Value for UniswapV02/SushiswapV01},
-pdfsubject={q-bio.NC, q-bio.QM},
-pdfauthor={Alexander Bradley, Sam Bacha},
-pdfkeywords={MEV, Ethereum, Uniswap, Sushiswap, High Frequency Trading, Decentralised Finance},
+	pdftitle={procedural approaches towards Maximal Extracted Value for UniswapV02/SushiswapV01},
+	pdfsubject={q-bio.NC, q-bio.QM},
+	pdfauthor={Alexander Bradley, Sam Bacha},
+	pdfkeywords={MEV, Ethereum, Uniswap, Sushiswap, High Frequency Trading, Decentralised Finance},
 }
 
 
@@ -72,277 +72,276 @@ pdfkeywords={MEV, Ethereum, Uniswap, Sushiswap, High Frequency Trading, Decentra
 
 
 %----------------------------------------------------------------------------------------
-	
-	% Print the title
-	\maketitle
-	
-	%----------------------------------------------------------------------------------------
-	%	ARTICLE CONTENTS
-	%----------------------------------------------------------------------------------------
-	
-		\begin{abstract}
-		Presented herein, a derivation of optimal arbitrage between 2 Constant Product Automated Market Maker (CPAAM), Decentralised Exchanges (DEXs) for usage in procedural processes that enable value extraction (i.e. MEV).
-		 This math is applied in the new Sushiswap router for at source Miner Extractable Value (MEV) post user swap atomically. 
-		Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
-	\end{abstract}
-	
-	\newpage
-	
-	\section{Introduction}
 
-    TODO: Overview paragraph 
-    
-	
-	The following sections describe the derivation of the optimal sizes for post user swap arbitrage between Uniswap V2 style exchanges.
-	 In particular direct (single hop) swaps. Since this subset of opportunities is concise and known, it is favoured for inclusion into the router contract. Clearly there is room for advancement to include tri-arbs and notable exchange protocols such as Curve and Uniswap V3, however these calculations are currently too expensive in gas to include on-chain. 
-	
-	For Sushiswap, this subset is huge as they operate on several chains with Uniswap V2 forks. As an example, on Avalanche there is TraderJoe, Fantom Spookyswap and Polygon Quickswap. This is therefore a cross chain solution.
-	
-	
+% Print the title
+\maketitle
 
-	
-	%------------------------------------------------
-	
-	\section{Constant Product Automated Market Maker}
-	Constant Product Automated Market Makers (CPAMMs) are smart contracts for token liquidity pairs. Uniswap V2 was the first to adopt this protocol. Sushiswap, Bancor, Kyber, Honeyswap, PancakeSwap and Quickswap all use the same protocol. They are all governed by the constant product formula given in equation \ref{eqn:constProduct}. 
-	
-	\begin{eqnarray}
-		k  &=& R_{\alpha}  R_{\beta}  \label{eqn:constProduct}
-	\end{eqnarray}
-	
-	Where \(R_{\alpha}\) corresponds to the Reserves of token \(\alpha\), \(R_{\beta}\) to the Reserves of token \(\beta\) within the pair contract and \( k \) the constant invariant. 
-	
-	A swap trading \( \Delta\beta\) tokens for \( \Delta\alpha \) must satisfy equation \ref{eqn:swap}.
-	
-	\begin{eqnarray}
-		k  &=& (R_{\alpha} - \Delta\alpha)  (R_{\beta} + \gamma\Delta\beta ) \label{eqn:swap}\\
-		\gamma  &=& 1 - fee \label{eqn:gamma}
-	\end{eqnarray}
-	
+%----------------------------------------------------------------------------------------
+%	ARTICLE CONTENTS
+%----------------------------------------------------------------------------------------
+
+\begin{abstract}
+	Presented herein, a derivation of optimal arbitrage between 2 Constant Product Automated Market Maker (CPAAM), Decentralised Exchanges (DEXs) for usage in procedural processes that enable value extraction (i.e. MEV).
+	This math is applied in the new Sushiswap router for at source Miner Extractable Value (MEV) post user swap atomically.
+	Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
+\end{abstract}
+
+\newpage
+
+\section{Introduction}
+
+TODO: Overview paragraph
+
+
+The following sections describe the derivation of the optimal sizes for post user swap arbitrage between Uniswap V2 style exchanges.
+In particular direct (single hop) swaps. Since this subset of opportunities is concise and known, it is favoured for inclusion into the router contract. Clearly there is room for advancement to include tri-arbs and notable exchange protocols such as Curve and Uniswap V3, however these calculations are currently too expensive in gas to include on-chain.
+
+For Sushiswap, this subset is huge as they operate on several chains with Uniswap V2 forks. As an example, on Avalanche there is TraderJoe, Fantom Spookyswap and Polygon Quickswap. This is therefore a cross chain solution.
+
+
+
+
+%------------------------------------------------
+
+\section{Constant Product Automated Market Maker}
+Constant Product Automated Market Makers (CPAMMs) are smart contracts for token liquidity pairs. Uniswap V2 was the first to adopt this protocol. Sushiswap, Bancor, Kyber, Honeyswap, PancakeSwap and Quickswap all use the same protocol. They are all governed by the constant product formula given in equation \ref{eqn:constProduct}.
+
+\begin{eqnarray}
+	k  &=& R_{\alpha}  R_{\beta}  \label{eqn:constProduct}
+\end{eqnarray}
+
+Where \(R_{\alpha}\) corresponds to the Reserves of token \(\alpha\), \(R_{\beta}\) to the Reserves of token \(\beta\) within the pair contract and \( k \) the constant invariant.
+
+A swap trading \( \Delta\beta\) tokens for \( \Delta\alpha \) must satisfy equation \ref{eqn:swap}.
+
+\begin{eqnarray}
+	k  &=& (R_{\alpha} - \Delta\alpha)  (R_{\beta} + \gamma\Delta\beta ) \label{eqn:swap}\\
+	\gamma  &=& 1 - fee \label{eqn:gamma}
+\end{eqnarray}
+
 $$
-\begin{aligned}
-&k=\left(R_{\alpha}-\Delta \alpha\right)\left(R_{\beta}+\gamma \Delta \beta\right) \\
-&\gamma=1-f e e
-\end{aligned}
+	\begin{aligned}
+		 & k=\left(R_{\alpha}-\Delta \alpha\right)\left(R_{\beta}+\gamma \Delta \beta\right) \\
+		 & \gamma=1-f e e
+	\end{aligned}
 $$
-	
-	Where the fee on Uniswap V2 and Sushiswap is 0.3\%. For big integer math, equation \ref{eqn:gamma} can be written in the form of equation \ref{eqn:gammaBig}.
-	
-	\begin{eqnarray}
-		\gamma  &=& \frac{997}{1000} \label{eqn:gammaBig}
-	\end{eqnarray}
-	
-	From equations \ref{eqn:constProduct} and \ref{eqn:swap} we can derive an equations for the expected amounts out and in, given in equations \ref{eqn:amountOut} and \ref{eqn:amountIn}. 
-	
-	\begin{eqnarray}
-		amountOut: \Delta\alpha  &=& \frac{997 R_{\alpha} \Delta\beta }{1000 R_{\beta} + 997 \Delta\beta} \label{eqn:amountOut}\\
-		amountIn: \Delta\beta  &=& \frac{1000 R_{\beta} \Delta\alpha }{997 (R_{\alpha} - \Delta\alpha)} \label{eqn:amountIn}
-	\end{eqnarray}
-	
-	Post swap, the new liquidity reserves are modified as shown in equations \ref{eqn:reserveA} and \ref{eqn:reserveB}.
-	
-	\begin{eqnarray}
-		R_{\alpha}{new}  &=& R_{\alpha}{old} - \Delta\alpha  \label{eqn:reserveA}\\
-		R_{\beta}{new}  &=& R_{\beta}{old} + \Delta\beta  \label{eqn:reserveB}
-	\end{eqnarray}
-	
-	Therefore sequential swaps can be simulated off-chain in a deterministic way, given the current liquidity state.
-	
-	\section{Minimal Procedural DEX Arbitrage}
-	Establishing a minimal swap for DEX arbitrage consists of a single swap on one DEX followed by the reverse swap on another.
-	
-	Token amount swap path:
-	\begin{eqnarray}
-		DEX0: \: \: \Delta\beta_{0} \Rightarrow \Delta\alpha_{0}\\
-		DEX1: \: \: \Delta\alpha_{0} \Rightarrow \Delta\beta_{1}
-	\end{eqnarray}
-	
-	\section{Optimal simple DEX arbitrage size}
-	From equation \ref{eqn:amountOut}, the definition of a simple DEX arbitrage for CPAMMs can be written in the form of equations \ref{eqn:dex1} and \ref{eqn:dex2}.
-	
-	\begin{eqnarray}
-		 \Delta\alpha_{0}  &=& \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}} \label{eqn:dex1}\\
-		 \Delta\beta_{1}  &=& \frac{997 R_{\beta 1} \Delta\alpha_{0} }{1000 R_{\alpha 1} + 997 \Delta\alpha_{0}} \label{eqn:dex2}
-	\end{eqnarray}
-	
-	Profit of the arbitrage is simply the amount out of the second trade minus the amount in of the first, shown by equation \ref{eqn:profit}.
-	
-	\begin{eqnarray}
-		profit: y  &=& \Delta\beta_{1} - \Delta\beta_{0} \label{eqn:profit}
-	\end{eqnarray}
-	
-	
-	Substituting equation \ref{eqn:dex1} into equation \ref{eqn:dex2}, we get equation \ref{eqn:suby}.
-	
-	\begin{eqnarray}
-		\Delta\beta_{1}  &=& \frac{997 R_{\beta 1} \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}} }{1000 R_{\alpha 1} + 997 \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}}} \label{eqn:suby}\\
-		&=& \frac{997^2 R_{\beta 1}  R_{\alpha 0} \Delta\beta_{0} }{(1000 R_{\beta 0} + 997 \Delta\beta_{0}) 1000 R_{\alpha 1} + 997^2 R_{\alpha 0} \Delta\beta_{0} } \label{eqn:subyMore}
-	\end{eqnarray}
-	
-	Since we are looking for the optimal amount In ( \(\Delta\beta_{0}\) ), we can make the following simplifications.
-	
-	\begin{eqnarray}
-		let \: x &=& \Delta\beta_{0}\\
-		let \: C_{A} &=& 997^2 R_{\beta 1}  R_{\alpha 0}\\
-		let \: C_{B} &=& 1000^2 R_{\beta 0} R_{\alpha 1}\\
-		let \: C_{C} &=& 997000  R_{\alpha 1}\\
-		let \: C_{D} &=& 997^2  R_{\alpha 0}
-	\end{eqnarray}
-	
-	Thus equation \ref{eqn:subyMore} can be reduced to equation \ref{eqn:reduceOut}.
-	
-	\begin{eqnarray}
-		\Delta\beta_{1}  &=& \frac{C_{A} x}{C_{B} + x(C_{C} + C_{D})} \label{eqn:reduceOut}
-	\end{eqnarray}
-	
-	Therefore the profit (y), from equation \ref{eqn:profit} can be expressed in terms of the amount In (x), shown in equation \ref{eqn:profit2}.
-	
-	\begin{eqnarray}
-		y  &=& \frac{C_{A} x}{C_{B} + x(C_{C} + C_{D})} - x \label{eqn:profit2}\\
-		&=& \frac{C_{A} x - x(C_{B} + x(C_{C} + C_{D}))}{C_{B} + x(C_{C} + C_{D})} \label{eqn:profit3}\\
-		&=& \frac{x(C_{A} - C_{B}) - x^2(C_{C} + C_{D})}{C_{B} + x(C_{C} + C_{D})} \label{eqn:profit4}\\
-		&=& \frac{x C_{F} - x^2 C_{G} }{C_{B} + x C_{G}} \label{eqn:profit5}
-	\end{eqnarray}
-	
-	Where:
-	\begin{eqnarray}
-		C_{F}  &=& C_{A} - C_{B}\\
-		C_{G}  &=& C_{C} + C_{D}
-	\end{eqnarray}
-	
-	Maximum profit occurs at a turning point i.e. where the gradient or differential is zero, shown in equation \ref{eqn:turn}.
-	
-	\begin{eqnarray}
-		\frac{dy}{dx} = 0 \label{eqn:turn}
-	\end{eqnarray}
-	
-	Since we have a complex equation for differentiating, we can use the quotient rule from equation \ref{eqn:quotient}. Numerator and denominator differentials are shown in equations \ref{eqn:fdash} and \ref{eqn:gdash}.
-	
-	\begin{eqnarray}
-		\frac{dy}{dx} &=& \frac{d \frac{ f(x)}{g(x)}}{dx} \label{eqn:turn2}\\
-		f(x) &=& x C_{F} - x^2 C_{G} \label{eqn:f}\\
-		g(x) &=& C_{B} + x C_{G} \label{eqn:g}\\
-		\frac{f(x)}{dx} &=& C_{F} - 2 x C_{G} \label{eqn:fdash}\\
-		\frac{g(x)}{dx} &=& C_{G} \label{eqn:gdash}
-	\end{eqnarray}
-	
-	Combining the quotient rule with equation \ref{eqn:turn}, we get equation \ref{eqn:quoSolDex}, which expands to equation \ref{eqn:quoSol2}.
-	
-	\begin{eqnarray}
-		f'g &=& g'f \label{eqn:quoSolDex}\\
-		(C_{F} - 2 x C_{G})(C_{B} + x C_{G}) &=& C_{G} ( x C_{F} - x^2 C_{G}) \label{eqn:quoSol2}
-	\end{eqnarray}
-	
-	Equation \ref{eqn:quoSol2} can be re-arranged to form a generic quadratic equation \ref{eqn:quadRefDex} and so the parameters can be defined for the quadratic solution in equation \ref{eqn:sol}.
-	
-	\begin{eqnarray}
-		x^2 C_{G}^2 + x(2 C_{B} C_{G}) - C_{B} C_{F} &=& 0 \label{eqn:quadRefDex}
-	\end{eqnarray}
-	
-	Solution to the optimal simple DEX arbitrage size for a given swap is shown in equation \ref{eqn:sol}.
-	
-	\begin{eqnarray}
-		x^* &=& \frac{-(2 C_{B} C_{G}) \pm \sqrt{(2 C_{B} C_{G})^2 - 4(C_{G}^2)(- C_{B} C_{F})}}{2 C_{G}^2} \label{eqn:sol}
-	\end{eqnarray}
-	
-	For positive roots only, this can be reduced to:
-	
-	\begin{eqnarray}
-		x^* &=& \frac{- C_{B} + \sqrt{C_{B} ^2 + C_{B} C_{F}}}{C_{G}} \label{eqn:sol2}
-	\end{eqnarray}
-	
-	%----------------------------------------------------------------------------------------
-	
-	\subsection{Tables}
-	See Trade Size Table~\ref{tab:table}.
-	
-	This work was done for \verb+booktabs+ (`Manifold Finance'), more information can be found at:
-	\begin{center}
-		\url{https://www.manifoldfinance.com}
-	\end{center}
-	
-	
+
+Where the fee on Uniswap V2 and Sushiswap is 0.3\%. For big integer math, equation \ref{eqn:gamma} can be written in the form of equation \ref{eqn:gammaBig}.
+
+\begin{eqnarray}
+	\gamma  &=& \frac{997}{1000} \label{eqn:gammaBig}
+\end{eqnarray}
+
+From equations \ref{eqn:constProduct} and \ref{eqn:swap} we can derive an equations for the expected amounts out and in, given in equations \ref{eqn:amountOut} and \ref{eqn:amountIn}.
+
+\begin{eqnarray}
+	amountOut: \Delta\alpha  &=& \frac{997 R_{\alpha} \Delta\beta }{1000 R_{\beta} + 997 \Delta\beta} \label{eqn:amountOut}\\
+	amountIn: \Delta\beta  &=& \frac{1000 R_{\beta} \Delta\alpha }{997 (R_{\alpha} - \Delta\alpha)} \label{eqn:amountIn}
+\end{eqnarray}
+
+Post swap, the new liquidity reserves are modified as shown in equations \ref{eqn:reserveA} and \ref{eqn:reserveB}.
+
+\begin{eqnarray}
+	R_{\alpha}{new}  &=& R_{\alpha}{old} - \Delta\alpha  \label{eqn:reserveA}\\
+	R_{\beta}{new}  &=& R_{\beta}{old} + \Delta\beta  \label{eqn:reserveB}
+\end{eqnarray}
+
+Therefore sequential swaps can be simulated off-chain in a deterministic way, given the current liquidity state.
+
+\section{Minimal Procedural DEX Arbitrage}
+Establishing a minimal swap for DEX arbitrage consists of a single swap on one DEX followed by the reverse swap on another.
+
+Token amount swap path:
+\begin{eqnarray}
+	DEX0: \: \: \Delta\beta_{0} \Rightarrow \Delta\alpha_{0}\\
+	DEX1: \: \: \Delta\alpha_{0} \Rightarrow \Delta\beta_{1}
+\end{eqnarray}
+
+\section{Optimal simple DEX arbitrage size}
+From equation \ref{eqn:amountOut}, the definition of a simple DEX arbitrage for CPAMMs can be written in the form of equations \ref{eqn:dex1} and \ref{eqn:dex2}.
+
+\begin{eqnarray}
+	\Delta\alpha_{0}  &=& \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}} \label{eqn:dex1}\\
+	\Delta\beta_{1}  &=& \frac{997 R_{\beta 1} \Delta\alpha_{0} }{1000 R_{\alpha 1} + 997 \Delta\alpha_{0}} \label{eqn:dex2}
+\end{eqnarray}
+
+Profit of the arbitrage is simply the amount out of the second trade minus the amount in of the first, shown by equation \ref{eqn:profit}.
+
+\begin{eqnarray}
+	profit: y  &=& \Delta\beta_{1} - \Delta\beta_{0} \label{eqn:profit}
+\end{eqnarray}
+
+
+Substituting equation \ref{eqn:dex1} into equation \ref{eqn:dex2}, we get equation \ref{eqn:suby}.
+
+\begin{eqnarray}
+	\Delta\beta_{1}  &=& \frac{997 R_{\beta 1} \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}} }{1000 R_{\alpha 1} + 997 \frac{997 R_{\alpha 0} \Delta\beta_{0} }{1000 R_{\beta 0} + 997 \Delta\beta_{0}}} \label{eqn:suby}\\
+	&=& \frac{997^2 R_{\beta 1}  R_{\alpha 0} \Delta\beta_{0} }{(1000 R_{\beta 0} + 997 \Delta\beta_{0}) 1000 R_{\alpha 1} + 997^2 R_{\alpha 0} \Delta\beta_{0} } \label{eqn:subyMore}
+\end{eqnarray}
+
+Since we are looking for the optimal amount In ( \(\Delta\beta_{0}\) ), we can make the following simplifications.
+
+\begin{eqnarray}
+	let \: x &=& \Delta\beta_{0}\\
+	let \: C_{A} &=& 997^2 R_{\beta 1}  R_{\alpha 0}\\
+	let \: C_{B} &=& 1000^2 R_{\beta 0} R_{\alpha 1}\\
+	let \: C_{C} &=& 997000  R_{\alpha 1}\\
+	let \: C_{D} &=& 997^2  R_{\alpha 0}
+\end{eqnarray}
+
+Thus equation \ref{eqn:subyMore} can be reduced to equation \ref{eqn:reduceOut}.
+
+\begin{eqnarray}
+	\Delta\beta_{1}  &=& \frac{C_{A} x}{C_{B} + x(C_{C} + C_{D})} \label{eqn:reduceOut}
+\end{eqnarray}
+
+Therefore the profit (y), from equation \ref{eqn:profit} can be expressed in terms of the amount In (x), shown in equation \ref{eqn:profit2}.
+
+\begin{eqnarray}
+	y  &=& \frac{C_{A} x}{C_{B} + x(C_{C} + C_{D})} - x \label{eqn:profit2}\\
+	&=& \frac{C_{A} x - x(C_{B} + x(C_{C} + C_{D}))}{C_{B} + x(C_{C} + C_{D})} \label{eqn:profit3}\\
+	&=& \frac{x(C_{A} - C_{B}) - x^2(C_{C} + C_{D})}{C_{B} + x(C_{C} + C_{D})} \label{eqn:profit4}\\
+	&=& \frac{x C_{F} - x^2 C_{G} }{C_{B} + x C_{G}} \label{eqn:profit5}
+\end{eqnarray}
+
+Where:
+\begin{eqnarray}
+	C_{F}  &=& C_{A} - C_{B}\\
+	C_{G}  &=& C_{C} + C_{D}
+\end{eqnarray}
+
+Maximum profit occurs at a turning point i.e. where the gradient or differential is zero, shown in equation \ref{eqn:turn}.
+
+\begin{eqnarray}
+	\frac{dy}{dx} = 0 \label{eqn:turn}
+\end{eqnarray}
+
+Since we have a complex equation for differentiating, we can use the quotient rule from equation \ref{eqn:quotient}. Numerator and denominator differentials are shown in equations \ref{eqn:fdash} and \ref{eqn:gdash}.
+
+\begin{eqnarray}
+	\frac{dy}{dx} &=& \frac{d \frac{ f(x)}{g(x)}}{dx} \label{eqn:turn2}\\
+	f(x) &=& x C_{F} - x^2 C_{G} \label{eqn:f}\\
+	g(x) &=& C_{B} + x C_{G} \label{eqn:g}\\
+	\frac{f(x)}{dx} &=& C_{F} - 2 x C_{G} \label{eqn:fdash}\\
+	\frac{g(x)}{dx} &=& C_{G} \label{eqn:gdash}
+\end{eqnarray}
+
+Combining the quotient rule with equation \ref{eqn:turn}, we get equation \ref{eqn:quoSolDex}, which expands to equation \ref{eqn:quoSol2}.
+
+\begin{eqnarray}
+	f'g &=& g'f \label{eqn:quoSolDex}\\
+	(C_{F} - 2 x C_{G})(C_{B} + x C_{G}) &=& C_{G} ( x C_{F} - x^2 C_{G}) \label{eqn:quoSol2}
+\end{eqnarray}
+
+Equation \ref{eqn:quoSol2} can be re-arranged to form a generic quadratic equation \ref{eqn:quadRefDex} and so the parameters can be defined for the quadratic solution in equation \ref{eqn:sol}.
+
+\begin{eqnarray}
+	x^2 C_{G}^2 + x(2 C_{B} C_{G}) - C_{B} C_{F} &=& 0 \label{eqn:quadRefDex}
+\end{eqnarray}
+
+Solution to the optimal simple DEX arbitrage size for a given swap is shown in equation \ref{eqn:sol}.
+
+\begin{eqnarray}
+	x^* &=& \frac{-(2 C_{B} C_{G}) \pm \sqrt{(2 C_{B} C_{G})^2 - 4(C_{G}^2)(- C_{B} C_{F})}}{2 C_{G}^2} \label{eqn:sol}
+\end{eqnarray}
+
+For positive roots only, this can be reduced to:
+
+\begin{eqnarray}
+	x^* &=& \frac{- C_{B} + \sqrt{C_{B} ^2 + C_{B} C_{F}}}{C_{G}} \label{eqn:sol2}
+\end{eqnarray}
+
+%----------------------------------------------------------------------------------------
+
+\subsection{Tables}
+See Trade Size Table~\ref{tab:table}.
+
+This work was done for \verb+booktabs+ (`Manifold Finance'), more information can be found at:
+\begin{center}
+	\url{https://www.manifoldfinance.com}
+\end{center}
+
+
 \begin{equation}
-    \vspace{\baselineskip}
-            \label{eq:epsilon}
-                \pr[\tikzmarknode{x}{\highlight{red}{$\mathcal{X}(\cdot)$}}\in \tikzmarknode{s}{\highlight{blue}{$\mathcal{S}$}}] \leq e^\epsilon \cdot \pr[\mathcal{X}(\cdot)\in \mathcal{S}]
+	\vspace{\baselineskip}
+	\label{eq:epsilon}
+	\pr[\tikzmarknode{x}{\highlight{red}{$\mathcal{X}(\cdot)$}}\in \tikzmarknode{s}{\highlight{blue}{$\mathcal{S}$}}] \leq e^\epsilon \cdot \pr[\mathcal{X}(\cdot)\in \mathcal{S}]
 \end{equation}
 \begin{tikzpicture}[overlay,remember picture,>=stealth,nodes={align=left,inner ysep=1pt},<-]
-    % For "X"
-    \path (x.north) ++ (0,2em) node[anchor=south east,color=red!67] (scalep){\textbf{system state}};
-    \draw [color=red!87](x.north) |- ([xshift=-0.3ex,color=red]scalep.south west);
-    % For "S"
-    \path (s.south) ++ (0,-1.5em) node[anchor=north west,color=blue!67] (mean){\textbf{$\mathcal{S} \subseteq \mathrm{Range}(\mathcal{X})$}};
-    \draw [color=blue!57](s.south) |- ([xshift=-0.3ex,color=blue]mean.south east);
+	% For "X"
+	\path (x.north) ++ (0,2em) node[anchor=south east,color=red!67] (scalep){\textbf{system state}};
+	\draw [color=red!87](x.north) |- ([xshift=-0.3ex,color=red]scalep.south west);
+	% For "S"
+	\path (s.south) ++ (0,-1.5em) node[anchor=north west,color=blue!67] (mean){\textbf{$\mathcal{S} \subseteq \mathrm{Range}(\mathcal{X})$}};
+	\draw [color=blue!57](s.south) |- ([xshift=-0.3ex,color=blue]mean.south east);
 \end{tikzpicture}
 
-	
-	
-	\begin{table}
-		\caption{Trade Size Efficiency}
-		\centering
-		\begin{tabular}{lll}
-			\toprule
-			\multicolumn{2}{c}{Part}                   \\
-			\cmidrule(r){1-2}
-			Name     & Description     & Size ($\mu$m) \\
-			\midrule
-			10,000 & ETH  & $\sim$100     \\
-			50,000     & ExactToken & $\sim$10      \\
-			100,000     & Token       & up to $10^6$  \\
-			\bottomrule
-		\end{tabular}
-		\label{tab:table}
-	\end{table}
-	
-	\subsection{Analysis}
-	\begin{itemize}
-		\item Benchmarking
-		\item Fuzzing
-		\item Invariant Testing
-	\end{itemize}
-	
-	
-	
-	\bibliographystyle{unsrtnat}
-	\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
+
+
+\begin{table}
+	\caption{Trade Size Efficiency}
+	\centering
+	\begin{tabular}{lll}
+		\toprule
+		\multicolumn{2}{c}{Part}              \\
+		\cmidrule(r){1-2}
+		Name    & Description & Size ($\mu$m) \\
+		\midrule
+		10,000  & ETH         & $\sim$100     \\
+		50,000  & ExactToken  & $\sim$10      \\
+		100,000 & Token       & up to $10^6$  \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:table}
+\end{table}
+
+\subsection{Analysis}
+\begin{itemize}
+	\item Benchmarking
+	\item Fuzzing
+	\item Invariant Testing
+\end{itemize}
+
+
+\bibliographystyle{unsrtnat}
+\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
 \begin{thebibliography}{1}
-\bibitem{Angeris2020}
-Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
-\newblock Guillermo Angeris et al. Optimal Routing for Constant Function Market Makers.	arXiv:2204.05238
-\newblock In {\em arXiv 1911.03380}, 26 Jul 2021
-    Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
+	\bibitem{Angeris2020}
+	Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
+	\newblock Guillermo Angeris et al. Optimal Routing for Constant Function Market Makers.	arXiv:2204.05238
+	\newblock In {\em arXiv 1911.03380}, 26 Jul 2021
+	Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
 
 
-\bibitem{Angeris2019}
-Guillermo Angeris et al. An analysis of Uniswap markets. 2019. arXiv: 1911.03380
-\newblock An analysis of Uniswap markets.
-Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
-\newblock {\em arXiv: 1911.03380}, 
+	\bibitem{Angeris2019}
+	Guillermo Angeris et al. An analysis of Uniswap markets. 2019. arXiv: 1911.03380
+	\newblock An analysis of Uniswap markets.
+	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
+	\newblock {\em arXiv: 1911.03380},
 
-\bibitem{Angeris2019}
-Guillermo Angeris, Alex Evans, Tarun Chitra
-\newblock Replicating Market Makers
-Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
-\newblock {\em arXiv:2103.14769}, 26 Mar 2021.
-
-
-\bibitem{Tarun2021}
-Guillermo Angeris, Alex Evans, Tarun Chitra
-\newblock Constant Function Market Makers: Multi-Asset Trades via Convex Optimization
-Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
-\newblock {\em arXiv:2107.12484 }, 26 Jul 2021]
-https://doi.org/10.48550/arXiv.2107.12484
+	\bibitem{Angeris2019}
+	Guillermo Angeris, Alex Evans, Tarun Chitra
+	\newblock Replicating Market Makers
+	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
+	\newblock {\em arXiv:2103.14769}, 26 Mar 2021.
 
 
-\bibitem{Tarun2022}
-Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
-\newblock Optimal Routing for Constant Function Market Makers
-Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
-\newblock {\em arXiv:2204.05238}, 11 Apr 2022]
-https://arxiv.org/abs/2204.05238v1
+	\bibitem{Tarun2021}
+	Guillermo Angeris, Alex Evans, Tarun Chitra
+	\newblock Constant Function Market Makers: Multi-Asset Trades via Convex Optimization
+	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
+	\newblock {\em arXiv:2107.12484 }, 26 Jul 2021]
+	https://doi.org/10.48550/arXiv.2107.12484
+
+
+	\bibitem{Tarun2022}
+	Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
+	\newblock Optimal Routing for Constant Function Market Makers
+	Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
+	\newblock {\em arXiv:2204.05238}, 11 Apr 2022]
+	https://arxiv.org/abs/2204.05238v1
 
 \end{thebibliography}
-	
-	
-	\end{document}
+
+
+\end{document}
