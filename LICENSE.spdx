@@ -1,0 +1,14 @@
+SPDXID: SPDXRef-DOCUMENT
+SPDXVersion: SPDX-2.0
+Creator: ManifoldFinance
+PackageName:
+PackageOriginator: ManifoldFinance
+PackageHomePage: https://github.com/manifoldfinance/
+PackageCopyrightText: Copyright 2022 Manifold Finance, Inc
+PackageLicenseDeclared: MPL-2.0
+LicenseInfoInFile: CC-2.5-SA
+LicenseInfoInFile: LPPL-1.3a
+FileCopyrightText: Copyright 2022 Manifold Finance, Inc
+FileContributor: Sandy Bradley
+FileContributor: Sam Bacha
+FileContributor: CommodityStream Corporation
