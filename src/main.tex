@@ -1,11 +1,28 @@
 \documentclass[runningheads]{llncs}
-%
+
+
+\usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{minted}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+\urlstyle{same}
+
+% This LaTeX Document is intended to be used on Overleaf 
+
+\usemintedstyle{vs}
+\usepackage[dvipsnames]{xcolor}
 %
 % If you use the hyperref package, please uncomment the following line
 % to display URLs in blue roman font according to Springer's eBook style:
-\renewcommand\UrlFont{\color{blue}\rmfamily}
+
 
 \begin{document}
 
@@ -28,74 +45,74 @@ et al\inst{1}}
 
 %
 \maketitle              % typeset the header of the contribution
-%
+
+\keywords{MEV, \and Miner Extractable Value \and trade optimization, \and EVM \and uniswap \and sushiswap \and ethereum \and formal verification}
+
+\tableofcontents
+
+
+%--------------------------------------------------------------------------------------------------------------------------------------
+\chapter{Overview}
 \begin{abstract}
-MEV is sucks.
-
-\keywords{mev \and trade optimziation, \and evm \and uniswap \and sushiswap \and ethereum \and formal verification}
+    MEV is sucks. \newline
+MEV suck, Sandwhiches sucks, use OpenMEVs.~\cite{openmev}.
 \end{abstract}
-%
-%
-%
-\section{Overview}
-		\begin{abstract}
-MEV suck, Sandwhiches sucks, use Manifolds.~\cite{openmev}.
-
-	\end{abstract}
-\subsection{Related Work}
-
-flashbots.
-MEVBOT9000
-something something dark forest
-baba yaga
 
 
 \section{Motivation and Requirements}
 
-<requirements doc goes here>
+%------------------------------------------------------------------------------------------------------------------------------------------------
+\subsection{Security properties}
 
-\subsection{K Model}
+In following the standards set forth by the UniswapV02/SushiswapV01 router contracts, the SushiswapV02 router contracts are intended to be safe to use with:
 
-k specification. <k specification goes here>
+Potentially reentrant tokens
+Tokens that do not return from transfer
+Pathological Tokens The SushiswapV02 router contracts are not intended to be used tokens that exhibit the following behavior
+Tokens that exhibit a discretizing inflation curve
+Tokens that exhibit an 'unowned' supply
+Tokens that implement user defined types for standard mathematical operations
+Numerical error analysis The engineering team would like to request a review of the numerical error incurred during contract execution, with a focus on the desirable invariants proposed by both the development team and auditors. Examples include any significant rounding error, if any, in a swap, favors the pool. etc.
+
+%----------------------------------------------------------------------------------------------------------------------------------------
 
 \subsection{Conformant Algorithms}	
 
 Conformant Algorithms
-Our requirements are phrased in the imperative as part of algorithms (such as "strip any leading space characters" or "return false and abort these steps") are to be interpreted with the meaning of the RFC/EIP defined key words ("must", "should", "may", etc) used in introducing algorithms
+Our requirements are phrased in the imperative, as such, part of algorithms (such as "strip any leading space characters" or "return false and abort these steps") are to be interpreted with the meaning of the RFC/EIP defined key words ("must", "should", "may", etc) used in introducing algorithms
 
 \hfill \break
 
-Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementers are encouraged to either: switch to an L2, optimize or use vyper.
+Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementers are encouraged to either: switch to an L2, optimize, or use Vyper\footnote{Vyperlang: https://vyper.readthedocs.io/en/stable/}.
 
 
-
+%------------------------------------------------------------------------------------------------------------------------------------------------
 \section{Swap Execution}
 	
 
-		Presented herein, a derivation of optimal arbitrage between 2 Constant Product Automated Market Maker (CPAAM), Decentralised Exchanges (DEXs) for usage in procedural processes that enable value extraction (i.e. MEV).
-		 This math is applied in the new Sushiswap router for at source Miner Extractable Value (MEV) post user swap atomically. 
-		Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
+Presented herein, a derivation of optimal arbitrage between 2 Constant Product Automated Market Maker (CPAAM), Decentralised Exchanges (DEXs) for usage in procedural processes that enable value extraction (i.e. MEV).
+This math is applied in the new Sushiswap router for at the source of  Miner Extractable Value (MEV). These trades post user swaps atomically. 
+Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
 
-<TODO: Table Goes Here>
 
 
 	\newpage
 	
-	\section{Introduction}
+\chapter{Mathematical Model}
 
 
     
 	
 	The following sections describe the derivation of the optimal sizes for post user swap arbitrage between UniswapV2 style exchanges.
 	
-	Note: Benchmarking contracts for establishing a baseline can be found here: https://github.com/manifoldfinance/v2-periphery/tree/master/contracts
+	\footnote{Benchmarking contracts for establishing a baseline can be found here: https://github.com/manifoldfinance/v2-periphery/tree/master/contracts }
 	
 	
 
 	%------------------------------------------------
 	
 	\section{Constant Product Automated Market Maker}
-	Constant Product Automated Market Makers (CPAMMs) are smart contracts for token liquidity pairs. Uniswap V2 was the first to adopt this protocol. Sushiswap, Bancor, Kyber, Honeyswap, PancakeSwap and Quickswap all use the same protocol. They are all governed by the constant product formula given in equation \ref{eqn:constProduct}. 
+	Constant Product Automated Market Makers (CPAMMs) are smart contracts for token liquidity pairs. UniswapV2 and SushiswapV1 are all governed by the constant product formula given in equation \ref{eqn:constProduct}. 
 	
 	\begin{eqnarray}
 		k  &=& R_{\alpha}  R_{\beta}  \label{eqn:constProduct}
@@ -236,28 +253,28 @@ Conformance requirements phrased as algorithms or specific steps that can be imp
 	\end{eqnarray}
 	
 
-\section{Liquidity Execution}
+\chapter{Equivalence Checking}
 
-\section{Equivalence Checking}
+\subsection{Backrun placement}
 
-Backrun placement
-
-By definition, backruns must occur after user to user swap. From a design point of view the simplest place to insert the backrun function would be in the internal `_swap` function which is called by the other swaps. However, some of the swap variants eg `swapTokensForExactETH` perform user actions after `_swap` is called. This is not ideal, as we do not want to interfere with the user swap. Moreover, other swap variants such as `swapExactTokensForTokensSupportingFeeOnTransferTokens` do not use `_swap`. Backrun functions were therefore placed at the end of each external swap variant. E.g.
+By definition, backruns must occur after user to user swap. From a design point of view the simplest place to insert the backrun function would be in the internal $_swap$ function which is called by the other swaps. However, some of the swap variants eg $swapTokensForExactETH$ perform user actions after $_swap$ is called. This is not ideal, as we do not want to interfere with the user swap. Moreover, other swap variants such as $swapExactTokensForTokensSupportingFeeOnTransferTokens$ do not use $_swap$. Backrun functions were therefore placed at the end of each external swap variant. E.g.
 
 Original
-\begin{minted}{javascript}{javascript}
 \label{Before swapExactTokensforTokens:1}
+\begin{minted}{lexer.py:SolidityLexer -x}
     function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
+       uint amountIn,
+       uint amountOutMin,
+       address[] calldata path,
+       address to,
+       uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
-            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+ amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
+ require(amounts[amounts.length - 1] 
+ >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+    TransferHelper.safeTransferFrom(
+            path[0], msg.sender, 
+            UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, to);
     }
@@ -265,8 +282,8 @@ Original
 
 Design change:
 
-\begin{minted}{javascript}
 \label{After swapExactTokensforTokens:2}
+\begin{minted}{lexer.py:SolidityLexer -x}
 function swapExactTokensForTokens(
     uint amountIn,
     uint amountOutMin,
@@ -275,9 +292,12 @@ function swapExactTokensForTokens(
     uint deadline
 ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
     amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-    require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+    require(amounts[amounts.length - 1] >= amountOutMin, 
+    'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
     TransferHelper.safeTransferFrom(
-        path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+        path[0],
+        msg.sender, 
+        UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
     );
     _swap(amounts, path, to);
     _backrunSwaps(path);
@@ -285,64 +305,76 @@ function swapExactTokensForTokens(
 \end{minted}
 
 Multiple factories
-Multiple factories (at least 2) are required for the backrun arbitrage. The adoption of multiple factories within the router, lead to some internal function changes. In particular `pairFor`.
+Multiple factories (at least 2) are required for the backrun arbitrage. The adoption of multiple factories within the router, lead to some internal function changes. In particular $pairFor$.
 
-\begin{minted}{javascript}
 \label{CREATE2 Factory:3}
+\begin{minted}{lexer.py:SolidityLexer -x}
 // calculates the CREATE2 address for a pair without making any external calls
-function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
+function pairFor(
+address factory, 
+address tokenA, 
+address tokenB
+) 
+internal pure returns (address pair) {
 (address token0, address token1) = sortTokens(tokenA, tokenB);
 pair = address(uint160(uint(keccak256(abi.encodePacked(
-        hex'ff',
-        factory,
-        keccak256(abi.encodePacked(token0, token1)),
-        hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // hard coded factory init code hash
+    hex'ff',
+    factory,
+    keccak256(abi.encodePacked(token0, token1)),
+    // hard coded factory init code hash
+    hex'96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f'
     )))));
 }
 \end{minted}
 
 Changes to 
-\begin{minted}{javascript}
+\begin{minted}{lexer.py:SolidityLexer -x}
 
-function pairFor(address factory, address tokenA, address tokenB) internal view returns (address pair) {
-    bytes memory factoryHash = factory == SUSHI_FACTORY ? SUSHI_FACTORY_HASH : BACKUP_FACTORY_HASH;
+function pairFor(address factory, address tokenA, address tokenB) 
+ internal view returns (address pair) {
+    bytes memory factoryHash = factory
+        == SUSHI_FACTORY ? SUSHI_FACTORY_HASH : BACKUP_FACTORY_HASH;
 
 (address token0, address token1) = _sortTokens(tokenA, tokenB);
-pair = address(uint160(uint(keccak256(abi.encodePacked(
-        hex'ff',
-        factory,
-        keccak256(abi.encodePacked(token0, token1)),
-        factoryHash // init code hash
+   pair = address(uint160(uint(keccak256(abi.encodePacked(
+     hex'ff',
+     factory,
+     keccak256(abi.encodePacked(token0, token1)),
+     factoryHash // init code hash
     )))));
 }
 \end{minted}
 
-Fallback factory
+\subsection{Fallback factory}
 Since the extra factory is required for the arbitrage, we can use it, for the user, to check for an available swap on the alternate factory if it would otherwise fail on the default factory through slippage.
 
-
-\begin{minted}{javascript}
 \label{Fallback Factory:4}
+\begin{minted}{lexer.py:SolidityLexer -x}
 amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
-require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+require(amounts[amounts.length - 1]
+>= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
 \end{minted}
 Changes to
-\begin{minted}{javascript}
+\begin{minted}{lexer.py:SolidityLexer -x}
 address factory = SUSHI_FACTORY;
 amounts = _getAmountsOut(factory, amountIn, path);
 if(amounts[amounts.length - 1] < amountOutMin){
     // Change 1 -> fallback for insufficient output amount, check backup router
     amounts = _getAmountsOut(BACKUP_FACTORY, amountIn, path);
-    require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+    require(amounts[amounts.length - 1] 
+    >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
     factory = BACKUP_FACTORY;
 }
 \end{minted}
 
+\chapter{Math Libraries and BigInt support}
 
-Uint256 overflow
+\paragraph{These following sections describe testing various math libraries to accommodate the additional calculations required of the router.}
+
+\subsection{Uint256 overflow}
 Optimal arbitrage calculations were overflowing uint256. e.g.
-\begin{minted}{javascript}
 \label{Uint256 overflow:5}
+\begin{minted}{lexer.py:SolidityLexer -x}
 uint Cd = reserve0Token1.mul(997).mul(997);
 uint Cc = reserve1Token1.mul(997000);
 uint Cb = reserve1Token1.mul(reserve0Token0).mul(1000).mul(1000);
@@ -355,8 +387,8 @@ uint c = Cb * Cf;
 uint d = (b*b) + ( 4 * a * c ); 
 \end{minted}
 
-would consistently overflow by `uint b`. Found out through individual checks:
-\begin{minted}{javascript}
+would consistently overflow by $uint b$. Found out through individual checks:
+\begin{minted}{lexer.py:SolidityLexer -x}
 unchecked {
     uint a = Cg * Cg;
     require(a/Cg == Cg,"a overflow");
@@ -368,18 +400,20 @@ unchecked {
     require(d/(b*b) == 4*a*c,"d overflow");
 }
 \end{minted}
+\newpage
 
-ABDKMath \footnote{https://github.com/abdk-consulting/abdk-libraries-solidity} libs were used for a time, as it avoided overflow by dropping to floats. E.g.
+ABDKMath \footnote{$https://github.com/abdk-consulting/abdk-libraries-solidity$} library was used for a time, as it avoided overflow by dropping to floats.
 
-\begin{minted}{javascript}
+ABDKMath Example
+\begin{minted}{lexer.py:SolidityLexer -x}
 bytes16 _Cg = ABDKMathQuad.fromUInt(Cg);
 bytes16 _a = ABDKMathQuad.mul(_Cg, _Cg);
 \end{minted}
 
 However we found this lost precision and failed echidna tests.
-\begin{minted}{javascript}
 \label{Uint256 overflow:5}
-\caption{{\em echidna} test}
+\begin{minted}{lexer.py:SolidityLexer -x}
+{\em echidna} test
 echidna_mulUint:  failed!
   Call sequence:
     setX1(1106235220955)
@@ -397,7 +431,7 @@ echidna_divUint:  failed!
     setX1(1)
 \end{minted}
 
-We also tried PRBMath\footnote{https://github.com/paulrberg/prb-math/} libs. These faired better in echidna tests but still suffered overflow issues. 
+We also tried PRBMath\footnote{https://github.com/paulrberg/prb-math/} library. These faired better in echidna tests but still suffered overflow issues. 
 
 \begin{minted}{javascript}
 echidna_mulUint:  failed!
@@ -416,7 +450,7 @@ echidna_divUint:  failed!
     setX1(1)
 \end{minted}
 
-Eventually we found Uint512\footnote{https://github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol} which both passed echidna and overflow issue.
+Ultimately we settled on Uint512 \footnote{see $github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol$} which both passed echidna and overflow issue.
 \begin{minted}{javascript}
 echidna_mulUint:  passed! 
 echidna_divUint:  passed!
@@ -424,17 +458,7 @@ echidna_divUint:  passed!
 
 
 
-https://github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol
-
-\section{Benchmarking}
-
-\section{Use Cases and Experiments}
-
-\subsection{SushiswapV01}
-
-\subsection{LayerZero: Crosschain}
-
-\section{Conclusions and Future Work}
+\chapter{Conclusions and Future Work}
 
 \newpage
 %
@@ -446,6 +470,7 @@ https://github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol
 % \bibliographystyle{splncs04}
 % \bibliography{mybibliography}
 %
+\chapter{Bibliography}
 \begin{thebibliography}{1}
 \bibitem{openmev}
 OpenMEV source code, \url{github.com/manifoldfinance/OpenMevRouter}.
@@ -479,7 +504,7 @@ Guillermo Angeris, Alex Evans, Tarun Chitra
 \newblock Constant Function Market Makers: Multi-Asset Trades via Convex Optimization
 Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
 \newblock {\em arXiv:2107.12484 }, 26 Jul 2021]
-https://doi.org/10.48550/arXiv.2107.12484
+\url{https://doi.org/10.48550/arXiv.2107.12484}
 
 \hfill \break
 \bibitem{Tarun2022}
@@ -487,8 +512,17 @@ Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
 \newblock Optimal Routing for Constant Function Market Makers
 Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
 \newblock {\em arXiv:2204.05238}, 11 Apr 2022]
-https://arxiv.org/abs/2204.05238v1
+\url{https://arxiv.org/abs/2204.05238v1}
 \hfill \break
+
+\hfill \break
+\bibitem{Suckut, 2022}
+Suckut, Simon 
+\newblock Uint512 Solidity Library
+\newblock {\em GitHub}, 11 Apr 2022]
+\url{$https://github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol$}
+
+
 
 \end{thebibliography}
 \end{document}
