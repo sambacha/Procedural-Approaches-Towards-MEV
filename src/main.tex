@@ -14,6 +14,14 @@
     pdfpagemode=FullScreen,
     }
 \urlstyle{same}
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{cleveref}       % smart cross-referencing, load after amsmath
 
 % This LaTeX Document is intended to be used on Overleaf 
 
@@ -50,29 +58,35 @@ et al\inst{1}}
 
 \tableofcontents
 
-
+\newpage 
 %--------------------------------------------------------------------------------------------------------------------------------------
-\chapter{Overview}
+\chapter{Protocol Specificcation}
 \begin{abstract}
     MEV is sucks. \newline
-MEV suck, Sandwhiches sucks, use OpenMEVs.~\cite{openmev}.
+MEV suck, Sandwiches sucks, use OpenMEVs.~\cite{openmev}.
 \end{abstract}
 
+\subsection{Design}
+The Original design for the router was to use flashloans only to arbitrage then immediately distribute profits to hard coded addresses. Apart from the issue of hard coded addresses, this setup was inefficient because of small amounts frequently being split and transferring to multiple addresses being expensive. This opened the possibility of leaving profits to accumulate on the router. Furthermore it provides a way to arbitrage without a flashloan, saving gas and the loan fee (i.e. more profit, less gas). Additionally, the harvesting profits means ownership control of the router. A more robust 2 step process was chosen to control and transfer router ownership and harvest control. Ideal setup would be multisig consensus ownership.
 
+\footnote{Ownership control of the router is not an issue, as a new router can be used or fallback to the legacy router contract.}
+
+
+\newpage
 \section{Motivation and Requirements}
 
-%------------------------------------------------------------------------------------------------------------------------------------------------
+%---------------------------------------------------------------------------------------------------------------------------
 \subsection{Security properties}
 
 In following the standards set forth by the UniswapV02/SushiswapV01 router contracts, the SushiswapV02 router contracts are intended to be safe to use with:
 
-Potentially reentrant tokens
+Potentially re-entrant tokens
 Tokens that do not return from transfer
 Pathological Tokens The SushiswapV02 router contracts are not intended to be used tokens that exhibit the following behavior
 Tokens that exhibit a discretizing inflation curve
 Tokens that exhibit an 'unowned' supply
 Tokens that implement user defined types for standard mathematical operations
-Numerical error analysis The engineering team would like to request a review of the numerical error incurred during contract execution, with a focus on the desirable invariants proposed by both the development team and auditors. Examples include any significant rounding error, if any, in a swap, favors the pool. etc.
+Numerical error analysis The engineering team would like to request a review of the numerical error incurred during contract execution, with a focus on the desirable invariant proposed by both the development team and auditors. Examples include any significant rounding error, if any, in a swap, favors the pool. etc.
 
 %----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,8 +109,44 @@ This math is applied in the new Sushiswap router for at the source of  Miner Ext
 Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
 
 
+Slippage: The amount of price impact that a liquidator engenders when trying to sell collateral.
+Slippage is denoted \text{$\Delta p(q)$} and is formally defined as the difference between the midpoint price at time $t, p_{\text {mid }}(t)$ and the execution price,  \text{$p_{\text {exec }}(q, t)$} for a traded quantity $q$ at time $$t, \Delta p(q, t)=p_{\text {mid }}(t)-p_{\text {exec }}(q, t)$$. This quantity is usually a function of other variables, such as implied and realized volatility. 
+\footnote{Slippage is also known as market impact within academic literature.}
 
-	\newpage
+
+\subsection{Router Implementation}
+As a general approach to security, deviation from current UniswapV2Router was kept to a minimum. Pair contract calls should be consistent with the existing router. Reliance on the new router storing and transferring tokens brings in a new attack vector. A robust Ownership setup, as above, was chosen to mitigate this threat along with reduction of functions accessing the funds. 2 helper libraries were also chosen from \text{solmate} to supersede \text{UniswapV2Helper} libraries for security.
+
+safeTransferLib
+ERC20
+Since UniswapV2Router was not designed to store tokens, some functions are not compatible and had to be changed. E.g.
+
+\begin{minted}{lexer.py:SolidityLexer -x}
+
+removeLiquidityETHSupportingFeeOnTransferTokens
+
+(, amountETH) = removeLiquidity(
+    token,
+    WETH,
+    liquidity,
+    amountTokenMin,
+    amountETHMin,
+    address(this),
+    deadline
+);
+TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
+\end{minted}
+Changes to
+
+\begin{minted}{lexer.py:SolidityLexer -x}
+uint256 balanceBefore = ERC20(token).balanceOf(address(this));
+(, amountETH) = removeLiquidity(token, weth, liquidity, amountTokenMin, amountETHMin, 
+address(this), 
+deadline);
+ERC20(token).safeTransfer(to, ERC20(token).balanceOf(address(this)) - balanceBefore);
+\end{minted}
+
+\newpage
 	
 \chapter{Mathematical Model}
 
@@ -412,8 +462,9 @@ bytes16 _a = ABDKMathQuad.mul(_Cg, _Cg);
 
 However we found this lost precision and failed echidna tests.
 \label{Uint256 overflow:5}
-\begin{minted}{lexer.py:SolidityLexer -x}
-{\em echidna} test
+\begin{lstlisting}
+
+# echidna test
 echidna_mulUint:  failed!
   Call sequence:
     setX1(1106235220955)
@@ -429,11 +480,12 @@ echidna_divUint:  failed!
   Call sequence:
     setX(10417774989007224423389698535018119)
     setX1(1)
-\end{minted}
+\end{lstlisting}
+
 
 We also tried PRBMath\footnote{https://github.com/paulrberg/prb-math/} library. These faired better in echidna tests but still suffered overflow issues. 
 
-\begin{minted}{javascript}
+\begin{lstlisting}
 echidna_mulUint:  failed!
   Call sequence:
     setX(115916773041390072873637598212453390567932363729484377996870)
@@ -448,13 +500,14 @@ echidna_divUint:  failed!
   Call sequence:
     setX(115989750869986627937072895547572258287879165164826483095329)
     setX1(1)
-\end{minted}
+\end{lstlisting}
+
 
 Ultimately we settled on Uint512 \footnote{see $github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol$} which both passed echidna and overflow issue.
-\begin{minted}{javascript}
+\begin{lstlisting}
 echidna_mulUint:  passed! 
 echidna_divUint:  passed!
-\end{minted}
+\end{lstlisting}
 
 
 
