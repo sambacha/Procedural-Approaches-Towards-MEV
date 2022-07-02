@@ -20,6 +20,19 @@
 \usepackage{microtype}      % microtypography
 
 \usepackage{listings}
+\lstdefinestyle{Bash}
+{language=bash,
+keywordstyle=\color{blue},
+basicstyle=\ttfamily,
+morekeywords={setX},
+alsoletter={:~$},
+morekeywords=[2]{setX:},
+keywordstyle=[2]{\color{red}},
+literate={\$}{{\textcolor{red}{\$}}}1 
+         {!}{{\textcolor{red}{!}}}1
+         {~}{{\textcolor{red}{\textasciitilde}}}1,
+}
+
 \usepackage{amsmath}
 \usepackage{cleveref}       % smart cross-referencing, load after amsmath
 
@@ -50,7 +63,7 @@
 	\email{\{sandy,sam\}@manifoldfinance.com}\\
 	\email{janitor@manifoldfinance.com}}
 
-
+\thanks{Thanks to Johannes, Kitsuana, et al}
 %
 \maketitle              % typeset the header of the contribution
 
@@ -58,22 +71,30 @@
 
 \tableofcontents
 
+
+
 \newpage
-%--------------------------------------------------------------------------------------------------------------------------------------
+
 \chapter{Protocol Specification}
 \begin{abstract}
-	MEV is sucks. \newline
-	MEV suck, Sandwiches sucks, use OpenMEVs.~\cite{openmev}.
+\text{}
+\newline
+\newline
+	\textbf{MEV is sucks. }\newline
+	MEV suck, \textbf{Sandwiches sucks},  \newline
+	\newline
+	use OpenMEVs.\footnote{Bacha, Sam "MEV is essentially looking for the reachable state where their balance is maximized. Given any arbitrary re-ordering, insertion or censorship of pending or existing transactions, this can suck, suck real hard."}
 \end{abstract}
 
-\subsection{Design}
-The Original design for the router was to use flashloans only to arbitrage then immediately distribute profits to hard coded addresses. Apart from the issue of hard coded addresses, this setup was inefficient because of small amounts frequently being split and transferring to multiple addresses being expensive. This opened the possibility of leaving profits to accumulate on the router. Furthermore it provides a way to arbitrage without a flashloan, saving gas and the loan fee (i.e. more profit, less gas). Additionally, the harvesting profits means ownership control of the router. A more robust 2 step process was chosen to control and transfer router ownership and harvest control. Ideal setup would be multisig consensus ownership.
+\section{Motivation}
+\text{see} \textbf{\emph{Abstract}}. 
 
-\footnote{Ownership control of the router is not an issue, as a new router can be used or fallback to the legacy router contract.}
+\subsection{Design}
+\paragrah{The Original design for the router was to use flashloans only to arbitrage then immediately distribute profits to hard coded addresses. Apart from the issue of hard coded addresses, this setup was inefficient because of small amounts frequently being split and transferring to multiple addresses being expensive. This opened the possibility of leaving profits to accumulate on the router. Furthermore it provides a way to arbitrage without a flashloan, saving gas and the loan fee (i.e. more profit, less gas). Additionally, the harvesting profits means ownership control of the router. A more robust 2 step process was chosen to control and transfer router ownership and harvest control. Ideal setup would be multisig consensus ownership.}\footnote{Ownership control of the router is not an issue, as a new router can be used or fallback to the legacy router contract.}
 
 
 \newpage
-\section{Motivation and Requirements}
+\section{Requirements}
 
 %---------------------------------------------------------------------------------------------------------------------------
 \subsection{Security properties}
@@ -97,7 +118,7 @@ Our requirements are phrased in the imperative, as such, part of algorithms (suc
 
 \hfill \break
 
-Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementer's are encouraged to either: switch to an L2, optimize, or use Vyper\footnote{Vyperlang: https://vyper.readthedocs.io/en/stable/}.
+Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementers are encouraged to either: switch to an L2, optimize, or use Vyper\footnote{Vyperlang: https://vyper.readthedocs.io/en/stable/}.
 
 
 %------------------------------------------------------------------------------------------------------------------------------------------------
@@ -308,8 +329,10 @@ For positive roots only, this can be reduced to:
 \subsection{Backrun placement}
 
 By definition, backruns must occur after user to user swap. From a design point of view the simplest place to insert the backrun function would be in the internal $_swap$ function which is called by the other swaps. However, some of the swap variants eg $swapTokensForExactETH$ perform user actions after $_swap$ is called. This is not ideal, as we do not want to interfere with the user swap. Moreover, other swap variants such as $swapExactTokensForTokensSupportingFeeOnTransferTokens$ do not use $_swap$. Backrun functions were therefore placed at the end of each external swap variant. E.g.
-
-Original
+\begin{figure}
+    \centering
+    \caption{Backrun Placement}
+    \label{fig:Backrun Placement}
 \label{Before swapExactTokensforTokens:1}
 \begin{minted}{lexer.py:SolidityLexer -x}
     function swapExactTokensForTokens(
@@ -318,7 +341,8 @@ Original
        address[] calldata path,
        address to,
        uint deadline
-    ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
+    ) external virtual override ensure(deadline) returns 
+    (uint[] memory amounts) {
  amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
  require(amounts[amounts.length - 1] 
  >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
@@ -329,9 +353,13 @@ Original
         _swap(amounts, path, to);
     }
 \end{minted}
+\end{figure}
 
-Design change:
 
+\begin{figure}
+    \centering
+    \caption{Backrun Implementation}
+    \label{fig:Backrun Implementation}
 \label{After swapExactTokensforTokens:2}
 \begin{minted}{lexer.py:SolidityLexer -x}
 function swapExactTokensForTokens(
@@ -353,8 +381,11 @@ function swapExactTokensForTokens(
     _backrunSwaps(path);
 }
 \end{minted}
+\end{figure}
 
-Multiple factories
+\newpage 
+
+\subsection{Multiple factories}
 Multiple factories (at least 2) are required for the backrun arbitrage. The adoption of multiple factories within the router, lead to some internal function changes. In particular $pairFor$.
 
 \label{CREATE2 Factory:3}
@@ -376,8 +407,13 @@ pair = address(uint160(uint(keccak256(abi.encodePacked(
     )))));
 }
 \end{minted}
+\newpage 
 
-Changes to
+\text{Changes to}
+\begin{figure}
+    \centering
+    \caption{New Factories Implementation}
+    \label{fig:New Factories}
 \begin{minted}{lexer.py:SolidityLexer -x}
 
 function pairFor(address factory, address tokenA, address tokenB) 
@@ -394,6 +430,7 @@ function pairFor(address factory, address tokenA, address tokenB)
     )))));
 }
 \end{minted}
+\end{figure}
 
 \subsection{Fallback factory}
 Since the extra factory is required for the arbitrage, we can use it, for the user, to check for an available swap on the alternate factory if it would otherwise fail on the default factory through slippage.
@@ -405,6 +442,10 @@ require(amounts[amounts.length - 1]
 >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
 \end{minted}
 Changes to
+\begin{figure}
+    \centering
+    \caption{Fallback Factory Implementation}
+    \label{fig:Fallback Factory Implementation}
 \begin{minted}{lexer.py:SolidityLexer -x}
 address factory = SUSHI_FACTORY;
 amounts = _getAmountsOut(factory, amountIn, path);
@@ -416,13 +457,14 @@ if(amounts[amounts.length - 1] < amountOutMin){
     factory = BACKUP_FACTORY;
 }
 \end{minted}
+\end{figure}
 
 \chapter{Math Libraries and BigInt support}
 
 \paragraph{These following sections describe testing various math libraries to accommodate the additional calculations required of the router.}
 
 \subsection{Uint256 overflow}
-Optimal arbitrage calculations were overflowing uint256. e.g.
+\text{Optimal arbitrage calculations were overflowing uint256. i.e.}
 \label{Uint256 overflow:5}
 \begin{minted}{lexer.py:SolidityLexer -x}
 uint Cd = reserve0Token1.mul(997).mul(997);
@@ -452,66 +494,88 @@ unchecked {
 \end{minted}
 \newpage
 
-ABDKMath \footnote{$https://github.com/abdk-consulting/abdk-libraries-solidity$} library was used for a time, as it avoided overflow by dropping to floats.
-
-ABDKMath Example
+\subsubsection{ABDKMath}
+\text{ABDKMath library was used for a time, as it avoided overflow by dropping to floats.}\footnote{$https://github.com/abdk-consulting/abdk-libraries-solidity$} 
 \begin{minted}{lexer.py:SolidityLexer -x}
 bytes16 _Cg = ABDKMathQuad.fromUInt(Cg);
 bytes16 _a = ABDKMathQuad.mul(_Cg, _Cg);
 \end{minted}
 
-However we found this lost precision and failed echidna tests.
-\label{Uint256 overflow:5}
-\begin{lstlisting}
+\text{However we found this lost precision and failed echidna tests.}
 
-# echidna test
-echidna_mulUint:  failed!
+
+\label{Uint256 overflow:5}
+\begin{figure}
+    \centering
+    \caption{Uint256 overflow:5}
+    \label{fig:Echidna Uint56 Overflow Tests}
+\begin{lstlisting}[style=Bash]
+echidna_mulUint:  
+failed!
+  Call sequence:
+    setX1(1106235220955)
+    setX(9390953368914254812617)
+
+echidna_Uint_conversion: 
+failed!
+  Call sequence:
+    setX(10518526264810785485368401065708505)
+
+echidna_divUint:  
+failed!
+  Call sequence:
+    setX(10417774989007224423389698535018119)
+    setX1(1)
+\end{lstlisting}
+\end{figure}
+
+\newpage 
+\subsubsection{PRBMath}
+
+We also tried PRBMath\footnote{https://github.com/paulrberg/prb-math/} library. These performed better in echidna tests but still suffered overflow issues.
+
+\begin{figure}
+    \centering
+    \caption{PRBMath}
+    \label{fig:Echidna PRBMath Tests}
+\begin{lstlisting}[style=Bash]
+echidna_mulUint:  
+~ failed!
   Call sequence:
     setX1(1106235220955)
     setX(9390953368914254812617)
 
 
-echidna_Uint_convertion:  failed!
+echidna_Uint_convertion:  
+~ failed!
   Call sequence:
     setX(10518526264810785485368401065708505)
 
 
-echidna_divUint:  failed!
+echidna_divUint:  
+~ failed!
   Call sequence:
     setX(10417774989007224423389698535018119)
     setX1(1)
 \end{lstlisting}
+\end{figure}
+
+\subsubsection{Uint512}
+\text{Ultimately we settled on Uint512  which both passed echidna and overflow issue.}\footnote{see $github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol$}
 
 
-We also tried PRBMath\footnote{https://github.com/paulrberg/prb-math/} library. These faired better in echidna tests but still suffered overflow issues.
-
+\begin{figure}
+    \centering
+    \caption{Uint512 }
+    \label{fig:Echidna Uint512 Tests}
 \begin{lstlisting}
-echidna_mulUint:  failed!
-  Call sequence:
-    setX(115916773041390072873637598212453390567932363729484377996870)
-
-
-echidna_Uint_convertion:  failed!
-  Call sequence:
-    setX(115962837499224411198969207499961588040517688084412876519766)
-
-
-echidna_divUint:  failed!
-  Call sequence:
-    setX(115989750869986627937072895547572258287879165164826483095329)
-    setX1(1)
+echidna_mulUint: ~ passed! 
+echidna_divUint: ~ passed!
 \end{lstlisting}
+\end{figure}
 
 
-Ultimately we settled on Uint512 \footnote{see $github.com/SimonSuckut/Solidity_Uint512/blob/main/contracts/Uint512.sol$} which both passed echidna and overflow issue.
-\begin{lstlisting}
-echidna_mulUint:  passed! 
-echidna_divUint:  passed!
-\end{lstlisting}
-
-
-
-\chapter{Conclusions and Future Work}
+\section{Conclusions and Future Work}
 
 \newpage
 %
@@ -524,35 +588,37 @@ echidna_divUint:  passed!
 % \bibliography{mybibliography}
 %
 \chapter{Bibliography}
+
 \begin{thebibliography}{1}
-	\bibitem{openmev}
+	\bibitem{[2022]Bacha}
+	Sam Bacha, Sandy Bradley.
 	OpenMEV source code, \url{github.com/manifoldfinance/OpenMevRouter}.
 	Last accessed 20 April 2022
 	\bibliographystyle{unsrtnat}
 	\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
 	\newline
-	\bibitem{Angeris2020}
+	\bibitem{[2020]Angeris:2020}
 	Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
 	\newblock Guillermo Angeris et al. Optimal Routing for Constant Function Market Makers.	arXiv:2204.05238
 	\newblock In {\em arXiv 1911.03380}, 26 Jul 2021
 	Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
 
 	\hfill \break
-	\bibitem{Angeris2019}
+	\bibitem{[2019]Angeris:2019}
 	Guillermo Angeris et al. An analysis of Uniswap markets. 2019. arXiv: 1911.03380
 	\newblock An analysis of Uniswap markets.
 	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
 	\newblock {\em arXiv: 1911.03380},
 
 	\hfill \break
-	\bibitem{Angeris2019}
+	\bibitem{[2019]Angeris}
 	Guillermo Angeris, Alex Evans, Tarun Chitra
 	\newblock Replicating Market Makers
 	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
 	\newblock {\em arXiv:2103.14769}, 26 Mar 2021.
 
 	\hfill \break
-	\bibitem{Tarun2021}
+	\bibitem{[2021]Tarun:2021}
 	Guillermo Angeris, Alex Evans, Tarun Chitra
 	\newblock Constant Function Market Makers: Multi-Asset Trades via Convex Optimization
 	Mathematical Finance (q-fin.MF); Optimization and Control; Trading and Market Microstructure (q-fin.TR)
@@ -560,16 +626,15 @@ echidna_divUint:  passed!
 	\url{https://doi.org/10.48550/arXiv.2107.12484}
 
 	\hfill \break
-	\bibitem{Tarun2022}
+	\bibitem{[2022]Tarun:2022}
 	Guillermo Angeris, Tarun Chitra, Alex Evans, Stephen Boyd
 	\newblock Optimal Routing for Constant Function Market Makers
 	Optimization and Control (math.OC); Trading and Market Microstructure (q-fin.TR)
 	\newblock {\em arXiv:2204.05238}, 11 Apr 2022]
 	\url{https://arxiv.org/abs/2204.05238v1}
-	\hfill \break
 
 	\hfill \break
-	\bibitem{Suckut, 2022}
+	\bibitem{[2022]Suckut}
 	Suckut, Simon
 	\newblock Uint512 Solidity Library
 	\newblock {\em GitHub}, 11 Apr 2022]
