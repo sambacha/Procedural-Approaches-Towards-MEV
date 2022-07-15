@@ -25,7 +25,7 @@
 keywordstyle=\color{blue},
 basicstyle=\ttfamily,
 morekeywords={setX},
-alsoletter={:~$},
+alsoletter={:~$}
 morekeywords=[2]{setX:},
 keywordstyle=[2]{\color{red}},
 literate={\$}{{\textcolor{red}{\$}}}1 
@@ -44,11 +44,10 @@ literate={\$}{{\textcolor{red}{\$}}}1
 % If you use the hyperref package, please uncomment the following line
 % to display URLs in blue roman font according to Springer's eBook style:
 
-
 \begin{document}
 
 
-%
+
 \title{Procedural approaches towards Maximal Extracted Value}
 %
 \author{Alexander Sandy Bradley\inst{1,2} \and
@@ -63,53 +62,70 @@ literate={\$}{{\textcolor{red}{\$}}}1
 	\email{\{sandy,sam\}@manifoldfinance.com}\\
 	\email{janitor@manifoldfinance.com}}
 
-\thanks{Thanks to Johannes, Kitsuana, et al}
-%
-\maketitle              % typeset the header of the contribution
+\maketitle
+\begin{abstract}
+
+mev succ.\footnote{Bacha, Sam "MEV is essentially looking for the reachable state where their balance is maximized. Given any arbitrary re-ordering, insertion or censorship of pending or existing transactions, this can suck, suck real hard."}
+sandwhich sucks.
+protecc usr. 
+use openmev. \cite{openmev}.
 
 \keywords{MEV, \and Miner Extractable Value \and trade optimization, \and EVM \and uniswap \and sushiswap \and ethereum \and formal verification}
-
-\tableofcontents
-
-
-
-\newpage
-
-\chapter{Protocol Specification}
-\begin{abstract}
-\text{}
-\newline
-\newline
-	\textbf{MEV is sucks. }\newline
-	MEV suck, \textbf{Sandwiches sucks},  \newline
-	\newline
-	use OpenMEVs.\footnote{Bacha, Sam "MEV is essentially looking for the reachable state where their balance is maximized. Given any arbitrary re-ordering, insertion or censorship of pending or existing transactions, this can suck, suck real hard."}
 \end{abstract}
 
+
+\section{Overview}
+	\textbf{MEV is sucks. }\newline
+ MEV or Maximal Extractable Value is the value of the ability to order transactions within a block or blocks\footnote{Tom Schmidt, Dragonfly Capital}
+	\newline
 \section{Motivation}
 \text{see} \textbf{\emph{Abstract}}. 
 
-\subsection{Design}
-\paragrah{The Original design for the router was to use flashloans only to arbitrage then immediately distribute profits to hard coded addresses. Apart from the issue of hard coded addresses, this setup was inefficient because of small amounts frequently being split and transferring to multiple addresses being expensive. This opened the possibility of leaving profits to accumulate on the router. Furthermore it provides a way to arbitrage without a flashloan, saving gas and the loan fee (i.e. more profit, less gas). Additionally, the harvesting profits means ownership control of the router. A more robust 2 step process was chosen to control and transfer router ownership and harvest control. Ideal setup would be multisig consensus ownership.}\footnote{Ownership control of the router is not an issue, as a new router can be used or fallback to the legacy router contract.}
+\subsubsection{The MEV Killchain} 
+An actor who can influence the order in which transactions are included in a block can affect the economic outcome of trades. The audit team is aware of two strategies for profitably exploiting this fact. Such strategies can be used not only by miners but also by any party who is able to observe unconfirmed transactions and submit their own transactions with carefully chosen gas prices. The router includes some features that provide some degree of protection against the first strategy, but no such mitigation's exist for the second.
 
+\subsection{Transaction time-dependence}
+Transaction reordering and front-running attacks can arguably be viewed as a broader structural problem inherent to many trading venues both with on-chain clearing and settlement and in legacy capital markets. 
+\footnote{Such strategies have been widespread in Ethereum for many years, and the rents accruing to miners from the transaction reordering privilege (miner extractable value) can even pose a threat to the security of the blockchain consensus layer.}
+
+By following the flow of balances, we observe that the aggregate economic effect of the sandwiching was equivalent to a trade between the front-runner and the trader (with the pool ending up back where they started, having only collected fees from the 3 transactions), however the front-runner was able to effectively choose the price at which the trade happens by choosing the size of their first trade, and so is able to set the price arbitrarily in their own favor. 
+\newline
+
+To see that this can still be profitable in the presence of LP fees, it suffices to observe that while LP fees paid by the front-runner are proportional to the size of the sandwich trade, the price impact of the sandwich trade on the Pair's price is quadratic in the size of the sandwich trade, meaning that the sandwich can be made profitable with a sufficiently large manipulating trade, and the trader's loss is only limited by the value of their trade.
+
+\subsection{Just in Time Liquidity Attacks}
+In this second variant, the attacker watches for large trades, and sandwiches the target trade with calls to mint and burn with a very large position relative to the initial size of the pool. The attacker is therefore able to extract a sizeable proportion of the LP fees for that trade without exposing themselves to the price risk inherent to providing liquidity on Uniswap.
+
+\subsection{Known Vectors of Attack}
+Neither the core nor the periphery contracts contain guards against this attack, and the audit team is not aware of any straightforward solution. A minimum lock lock time for liquidity providers, imposed in the core, could potentially help to reduce the profits siphon-able with this attack.\footnote{See https://etherscan.io/token/0x05934eba98486693aaec2d00b0e9ce918e37dc3f#tokenTrade}
+\newpage 
+\subsection{Current Mitigations}
+The methods exposed on the user-facing UniswapV2Router02 contract contain arguments that allow callers to impose off-chain slippage limits on their orders (AmountOutMin, AmountOutMax), and when set appropriately these parameters can limit the losses to trader front-running. Note however that it might not be possible to eliminate front-running entirely with this technique, since setting the slippage limit too tightly to the market could result in a poor success rate, with the market moving against the trader.\footnote{Deadline, or the expiry of the trade, can also be used to mitigate the risk of front-running.}
+
+\subsection{Targeted Attacks}
+It has been observed and reported non-economic manipulations of UniswapV2 and SushiswapV01 markets to derive a competitive advantage against other tokens / assets trading. Care has been taken to make the implementation not use or be ab usable by such tokens. A notable example is the effect of rebasing tokens on volume measures. A protocol called DELTAV1\cite{Bacha 2022} was banned from UniswapV2's frontend interface for 'manipulating' their frontend. Afterwards Uniswap took the unilateral action to ban any rebase token from showing on volume measures on their analytics or frontend.
+
+\subsection{Desirable Security properties}
+In following the standards set forth by the UniswapV02 and SushiswapV01 router contracts, the SushiswapV02 router contracts are intended to be safe to use with:
+
+\begin{itemize}
+  \item Potentially reentrant tokens
+  \item Tokens that do not return from transfer
+  \item Pathological Tokens The SushiswapV02 router contracts are not intended to be used tokens that exhibit the following behavior
+  \item Tokens that exhibit a discretizing inflation curve
+  \item Tokens that exhibit an 'unowned' supply
+  \item Tokens that implement user defined types for standard mathematical operations
+  \item Numerical error analysis The engineering team would like to request a review of the numerical error incurred during contract execution, with a focus on the desirable invariant proposed by both the development team and auditors. \footnote{Examples include any significant rounding error, if any, in a swap, favors the pool. etc.}
+\end{itemize}
 
 \newpage
 \section{Requirements}
 
-%---------------------------------------------------------------------------------------------------------------------------
-\subsection{Security properties}
+\subsection{Design and Implementation }
+\paragrah{The Original design for the router was to use flashloans only to arbitrage then immediately distribute profits to hard coded addresses. Apart from the issue of hard coded addresses, this setup was inefficient because of small amounts frequently being split and transferring to multiple addresses being expensive. This opened the possibility of leaving profits to accumulate on the router. Furthermore it provides a way to arbitrage without a flashloan, saving gas and the loan fee (i.e. more profit, less gas). Additionally, the harvesting profits means ownership control of the router. A more robust 2 step process was chosen to control and transfer router ownership and harvest control. Ideal setup would be multisig consensus ownership.}\footnote{Ownership control of the router is not an issue, as a new router can be used or fallback to the legacy router contract.}
 
-In following the standards set forth by the UniswapV02/SushiswapV01 router contracts, the SushiswapV02 router contracts are intended to be safe to use with:
-
-Potentially re-entrant tokens
-Tokens that do not return from transfer
-Pathological Tokens The SushiswapV02 router contracts are not intended to be used tokens that exhibit the following behavior
-Tokens that exhibit a discretizing inflation curve
-Tokens that exhibit an 'unowned' supply
-Tokens that implement user defined types for standard mathematical operations
-Numerical error analysis The engineering team would like to request a review of the numerical error incurred during contract execution, with a focus on the desirable invariant proposed by both the development team and auditors. Examples include any significant rounding error, if any, in a swap, favors the pool. etc.
-
-%----------------------------------------------------------------------------------------------------------------------------------------
+\subsection{Optimal Routing}
+Optimal routing problem. We wish to find a set of valid trades that maximizes the trader's utility.\cite{Angiers 2021, Optimal Routing for Constant Function Market Makers}
 
 \subsection{Conformant Algorithms}
 
@@ -118,61 +134,24 @@ Our requirements are phrased in the imperative, as such, part of algorithms (suc
 
 \hfill \break
 
-Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementers are encouraged to either: switch to an L2, optimize, or use Vyper\footnote{Vyperlang: https://vyper.readthedocs.io/en/stable/}.
+Conformance requirements phrased as algorithms or specific steps that can be implemented in any manner, so long as the end result are equivalent. In particular, the algorithms defined in this specification are intended to be easy to understand and are not necessarily intended to be performant. Implementers are encouraged to either: switch to an L2, optimize, or use Vyper\footnote{Vyperlang: https://vyper.readthedocs.io/en/stable/, Cooper Charles}.
 
-
-%------------------------------------------------------------------------------------------------------------------------------------------------
+\newpage
 \section{Swap Execution}
-
 
 Presented herein, a derivation of optimal arbitrage between 2 Constant Product Automated Market Maker (CPAAM), Decentralized Exchanges (DEXs) for usage in procedural processes that enable value extraction (i.e. MEV).
 This math is applied in the new Sushiswap router for at the source of  Miner Extractable Value (MEV). These trades post user swaps atomically.
 Profits are distributed to liquidity providers, in turn giving users better rates. Extracting MEV at source protects user trades from front-run attacks inherently and helps prevent fee spikes from attackers.
-
+\newline 
 
 Slippage: The amount of price impact that a liquidator engenders when trying to sell collateral.
 Slippage is denoted \text{$\Delta p(q)$} and is formally defined as the difference between the midpoint price at time $t, p_{\text {mid }}(t)$ and the execution price,  \text{$p_{\text {exec }}(q, t)$} for a traded quantity $q$ at time $$t, \Delta p(q, t)=p_{\text {mid }}(t)-p_{\text {exec }}(q, t)$$. This quantity is usually a function of other variables, such as implied and realized volatility.
 \footnote{Slippage is also known as market impact within academic literature.}
 
 
-\subsection{Router Implementation}
-As a general approach to security, deviation from current UniswapV2Router was kept to a minimum. Pair contract calls should be consistent with the existing router. Reliance on the new router storing and transferring tokens brings in a new attack vector. A robust Ownership setup, as above, was chosen to mitigate this threat along with reduction of functions accessing the funds. 2 helper libraries were also chosen from \text{solmate} to supersede \text{UniswapV2Helper} libraries for security.
-
-safeTransferLib
-ERC20
-Since UniswapV2Router was not designed to store tokens, some functions are not compatible and had to be changed. E.g.
-
-\begin{minted}{lexer.py:SolidityLexer -x}
-
-removeLiquidityETHSupportingFeeOnTransferTokens
-
-(, amountETH) = removeLiquidity(
-    token,
-    WETH,
-    liquidity,
-    amountTokenMin,
-    amountETHMin,
-    address(this),
-    deadline
-);
-TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
-\end{minted}
-Changes to
-
-\begin{minted}{lexer.py:SolidityLexer -x}
-uint256 balanceBefore = ERC20(token).balanceOf(address(this));
-(, amountETH) = removeLiquidity(token, weth, liquidity, amountTokenMin, amountETHMin, 
-address(this), 
-deadline);
-ERC20(token).safeTransfer(to, ERC20(token).balanceOf(address(this)) - balanceBefore);
-\end{minted}
-
 \newpage
 
-\chapter{Mathematical Model}
-
-
-
+\section{Mathematical Model}
 
 The following sections describe the derivation of the optimal sizes for post user swap arbitrage between UniswapV2 style exchanges.
 
